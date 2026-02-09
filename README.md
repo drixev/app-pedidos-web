@@ -1,73 +1,44 @@
-# React + TypeScript + Vite
+## Pedidos Web – Order Management Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Pedidos Web** is a small React + TypeScript dashboard that helps you manage customer orders in a simple and friendly way.  
+It includes **secure login** and a full **CRUD** (create, read, update, delete) flow for orders.
 
-Currently, two official plugins are available:
+### What you can do
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Login**:  
+  - Sign in with your credentials to access the dashboard.  
+  - All order actions are protected and only available for authenticated users.
 
-## React Compiler
+- **Create orders**:  
+  - Open a dialog to register a new order with its main details (for example: client, description, status, etc.).  
+  - Save the order so it immediately appears in the list.
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+- **View orders**:  
+  - See a table with all existing orders.  
+  - Quickly understand the status of each order from a single screen.
 
-## Expanding the ESLint configuration
+- **Update orders**:  
+  - Open an existing order, adjust its information, and save the changes.  
+  - Keep orders always up to date as they move through your process.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Delete orders**:  
+  - Remove orders that are no longer needed.  
+  - Keep your list clean and focused on active work.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Tech stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Frontend**: React + TypeScript (Vite)  
+- **API integration**: Axios-based services for authentication and orders  
+- **State & context**: React hooks and an auth context to handle the user session
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Running the app
+
+From the project root:
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Then open the printed local URL in your browser to use the login and start managing orders.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
