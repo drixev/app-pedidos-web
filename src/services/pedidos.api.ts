@@ -5,11 +5,12 @@ import { HttpStatusCode } from "axios";
 import { ORDERS_KEY } from "./constants/keyStorage.contants";
 
 async function getStoredOrders(): Promise<Order[]> {
+  
   const raw = localStorage.getItem(ORDERS_KEY);
   if (!raw) {
-    var response = await apiClient().get('/');
+    var response = await apiClient().get(import.meta.env.VITE_PEDIDOS_API_URL);
 
-    var orders = Array(response.data).map(ord => adaptResponseToDomain(ord))
+    var orders = (response.data as any[]).map(ord => adaptResponseToDomain(ord))
 
     localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
     return orders;
@@ -24,14 +25,14 @@ function saveOrders(orders: Order[]) {
 export const apiService = {
 
   async getAll(): Promise<Order[]> {
-    return getStoredOrders();
+    return await getStoredOrders();
   },
 
   async getById(id: string): Promise<Order> {
     const orders = await getStoredOrders();
     const order = orders.find((o) => o.id === id);
     if (!order) {
-      const orderFromDb = await apiClient().get(`/${id}`);
+      const orderFromDb = await apiClient().get(`${import.meta.env.VITE_PEDIDOS_API_URL}/${id}`);
       if (!orderFromDb) throw new Error('Order not found');
       return adaptResponseToDomain(orderFromDb);
     }
@@ -48,7 +49,7 @@ export const apiService = {
       estado: payload.status
     };
 
-    const response = await apiClient().post('/', payloadNewOrder);
+    const response = await apiClient().post(import.meta.env.VITE_PEDIDOS_API_URL, payloadNewOrder);
 
     if (response.status !== HttpStatusCode.Created) {
       throw new Error(response.data);
@@ -77,7 +78,7 @@ export const apiService = {
       estado: payload.status
     };
 
-    const response = await apiClient().put('/', payloadUpdateOrder);
+    const response = await apiClient().put(`${import.meta.env.VITE_PEDIDOS_API_URL}/${id}`, payloadUpdateOrder);
 
     if (response.status !== HttpStatusCode.NoContent) {
       throw new Error(response.data);
@@ -92,7 +93,7 @@ export const apiService = {
 
   async delete(id: string): Promise<void> {
 
-    const response = await apiClient().delete(`/${id}`);
+    const response = await apiClient().delete(`${import.meta.env.VITE_PEDIDOS_API_URL}/${id}`);
 
     if (response.status !== HttpStatusCode.NoContent) {
       throw new Error(response.data);

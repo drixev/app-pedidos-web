@@ -6,6 +6,7 @@ export interface Order {
   updatedAt?: string;
   total: number;
   status: "registered" | "in_progress" | "completed" | "deleted";
+  description?:string;
 }
 
 export interface CreateOrderPayload {
@@ -13,6 +14,7 @@ export interface CreateOrderPayload {
   client: string;
   total: number;
   status: Order["status"];
+  description?:string;
 }
 
 export type UpdateOrderPayload = Partial<CreateOrderPayload>;

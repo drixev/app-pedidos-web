@@ -7,7 +7,7 @@ export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthSession> {
     if (credentials.email && credentials.password.length >= 4) {
 
-      var response = await apiClient().post('/', {
+      var response = await apiClient().post(import.meta.env.VITE_AUTH_API, {
         email: credentials.email,
         password: credentials.password
       });
@@ -18,13 +18,15 @@ export const authService = {
 
       const authData = response.data as {
         token: string;
-        expiresIn: number
-      }
+        expiresIn: number;
+      };
+
+      const expiresAt = Date.now() + authData.expiresIn * 1000;
 
       const session: AuthSession = {
         token: authData.token,
         user: credentials.email,
-        expiresIn: (authData.expiresIn / 60),
+        expiresIn: expiresAt,
       };
       localStorage.setItem(SESSION_KEY, JSON.stringify(session));
       return session;
@@ -52,6 +54,7 @@ export const authService = {
   },
 
   logout() {
-    localStorage.removeItem(SESSION_KEY);
+    /* localStorage.removeItem(SESSION_KEY); */
+    localStorage.clear();
   },
 }

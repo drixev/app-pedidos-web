@@ -8,8 +8,8 @@ import { Terminal, Loader2 } from "lucide-react";
 
 const Login = () => {
   const { login } = useAuth();
-  const [email, setEmail] = useState("admin@dev.io");
-  const [password, setPassword] = useState("admin");
+  const [email, setEmail] = useState("user1@example.com");
+  const [password, setPassword] = useState("user123");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 

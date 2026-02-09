@@ -51,7 +51,7 @@ export const CreateOrderDialog = (props: OrderDialogProps) => {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-              Title
+              Nro Order
             </Label>
             <Input
               value={form.nroOrder}
@@ -66,9 +66,9 @@ export const CreateOrderDialog = (props: OrderDialogProps) => {
               Description
             </Label>
             <Textarea
-              value={form.client}
+              value={form.description ?? ''}
               onChange={(e) =>
-                handleFormChange({ ...form, client: e.target.value })
+                handleFormChange({ ...form, description: e.target.value })
               }
               className="bg-secondary border-border min-h-[80px]"
             />
@@ -104,7 +104,21 @@ export const CreateOrderDialog = (props: OrderDialogProps) => {
                 handleFormChange({ ...form, client: e.target.value })
               }
               className="bg-secondary border-border"
-              placeholder="email@dev.io"
+              placeholder="Client name here"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              Total
+            </Label>
+            <Input
+              type="number"
+              value={form.total}
+              onChange={(e) =>
+                handleFormChange({ ...form, total: Number(e.target.value) })
+              }
+              className="bg-secondary border-border"
+              placeholder="Client name here"
             />
           </div>
         </div>

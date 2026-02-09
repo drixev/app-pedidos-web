@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { apiService } from "@/services/pedidos.api";
+
 import { Order, CreateOrderPayload } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,128 +21,43 @@ import {
   RefreshCw,
   Eye,
 } from "lucide-react";
-import { toast } from "sonner";
+
 import SessionBar from "@/components/SessionBar";
 import OrderDetailDialog from "@/components/OrderDetailDialog";
 import { CreateOrderDialog } from "@/components/CreateOrderDialog";
 import { statusColors } from "@/lib/enum";
+import { useDashboard } from "@/hooks/useDashboard";
 
-const emptyOrder: CreateOrderPayload = {
-  nroOrder: "",
-  client: "",
-  createdAt: "",
-  total: 0,
-  status: "registered",
-};
 
 const Dashboard = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [detailOrder, setDetailOrder] = useState<Order | null>(null);
-  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
-  const [form, setForm] = useState<CreateOrderPayload>(emptyOrder);
-  const [saving, setSaving] = useState(false);
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const data = await apiService.getAll();
-      setOrders(data);
-    } catch {
-      toast.error("Failed to fetch orders");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const openCreate = () => {
-    setEditingOrder(null);
-    setForm(emptyOrder);
-    setDialogOpen(true);
-  };
-
-  const openEdit = (order: Order) => {
-    setEditingOrder(order);
-    setForm({
-      nroOrder: order.nroOrder,
-      client: order.client,
-      status: order.status,
-      createdAt: order.createdAt,
-      total: order.total,
-    });
-    setDialogOpen(true);
-  };
-
-  const openDetail = async (id: string) => {
-    try {
-      const order = await apiService.getById(id);
-      setDetailOrder(order);
-    } catch {
-      toast.error("Failed to load order");
-    }
-  };
-
-  const handleSave = async () => {
-    if (!form.nroOrder.trim() || !form.createdAt.trim()) {
-      toast.error("Title and assignee are required");
-      return;
-    }
-    setSaving(true);
-    try {
-      if (editingOrder) {
-        await apiService.update(editingOrder.id, form);
-        toast.success("Order updated");
-      } else {
-        await apiService.create(form);
-        toast.success("Order created");
-      }
-      setDialogOpen(false);
-      fetchOrders();
-    } catch {
-      toast.error("Failed to save order");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await apiService.delete(id);
-      toast.success("Order deleted");
-      fetchOrders();
-    } catch {
-      toast.error("Failed to delete order");
-    }
-  };
-
-  const filtered = orders.filter(
-    (o) =>
-      o.nroOrder.toLowerCase().includes(search.toLowerCase()) ||
-      o.client.toLowerCase().includes(search.toLowerCase()) ||
-      o.createdAt.toLowerCase().includes(search.toLowerCase()) ||
-      o.status.includes(search.toLowerCase()),
-  );
-
-  const stats = {
-    total: orders.length,
-    registered: orders.filter((o) => o.status === "registered").length,
-    in_progress: orders.filter((o) => o.status === "in_progress").length,
-    completed: orders.filter((o) => o.status === "completed").length,
-    deleted: orders.filter((o) => o.status === "deleted").length,
-  };
+  const {
+    stats,
+    search,
+    loading,
+    filtered,
+    dialogOpen,
+    editingOrder,
+    form,
+    saving,
+    detailOrder,
+    fetchOrders,
+    openDetail,
+    openEdit,
+    openCreate,
+    handleSave,
+    handleDelete,
+    setForm,
+    setSearch,
+    setDetailOrder,
+    setDialogOpen,
+  } = useDashboard();
 
   const actionsButtons = (order: Order) => (
     <div className="flex justify-end gap-1">
       <Button
         variant="ghost"
         size="icon"
-        className="h-7 w-7"
+        className="h-7 w-7 hover:shadow-lg hover:-translate-y-1 ease-in-out hover:cursor-pointer"
         onClick={() => openDetail(order.id)}
       >
         <Eye className="h-3.5 w-3.5 text-muted-foreground" />
@@ -151,7 +65,7 @@ const Dashboard = () => {
       <Button
         variant="ghost"
         size="icon"
-        className="h-7 w-7"
+        className="h-7 w-7 hover:shadow-lg hover:-translate-y-1 ease-in-out hover:cursor-pointer"
         onClick={() => openEdit(order)}
       >
         <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
@@ -159,7 +73,7 @@ const Dashboard = () => {
       <Button
         variant="ghost"
         size="icon"
-        className="h-7 w-7"
+        className="h-7 w-7 hover:shadow-lg hover:-translate-y-1 ease-in-out hover:cursor-pointer"
         onClick={() => handleDelete(order.id)}
       >
         <Trash2 className="h-3.5 w-3.5 text-destructive" />
@@ -282,7 +196,7 @@ const Dashboard = () => {
                             variant="outline"
                             className={`font-mono text-xs ${statusColors[order.status]}`}
                           >
-                            {order.status.replace("_", " ")}
+                            {order.status?.replace("_", " ")}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">

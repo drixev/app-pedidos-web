@@ -14,7 +14,7 @@ const SessionBar = () => {
     <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
       <div className="flex items-center gap-3">
         <span className="font-mono text-lg font-bold tracking-tight text-foreground">
-          dev::orders
+          Drixev - Orders
         </span>
         <span className="hidden sm:inline-block rounded bg-primary/10 px-2 py-0.5 font-mono text-xs text-primary">
           CRUD v1.0
@@ -29,7 +29,7 @@ const SessionBar = () => {
         </div>
         <div className="hidden sm:flex items-center gap-2 text-muted-foreground">
           <User className="h-3.5 w-3.5" />
-          <span className="font-mono text-xs">{session.user.email}</span>
+          <span className="font-mono text-xs">{session.user}</span>
         </div>
         <Button variant="ghost" size="sm" onClick={logout} className="font-mono text-xs text-muted-foreground hover:text-destructive">
           <LogOut className="mr-1 h-3.5 w-3.5" />
