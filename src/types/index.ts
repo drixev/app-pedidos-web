@@ -11,7 +11,6 @@ export interface Order {
 export interface CreateOrderPayload {
   nroOrder: string;
   client: string;
-  createdAt: string;
   total: number;
   status: Order["status"];
 }
@@ -20,7 +19,7 @@ export type UpdateOrderPayload = Partial<CreateOrderPayload>;
 
 export interface AuthSession {
   token: string;
-  user: { id: string; email: string; name: string };
+  user: string;
   expiresIn: number;
 }
 

@@ -1,59 +1,61 @@
 import { Order, CreateOrderPayload, UpdateOrderPayload } from "@/types";
+import { apiClient } from "./axiosInstance";
+import { adaptResponseToDomain } from "./adapters/responseToDomain.adapt";
+import { HttpStatusCode } from "axios";
+import { ORDERS_KEY } from "./constants/keyStorage.contants";
 
-const ORDERS_KEY = "dev_crud_orders";
-
-function getStoredOrders(): Order[] {
+async function getStoredOrders(): Promise<Order[]> {
   const raw = localStorage.getItem(ORDERS_KEY);
   if (!raw) {
-    const seed = generateSeedOrders();
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(seed));
-    return seed;
+    var response = await apiClient().get('/');
+
+    var orders = Array(response.data).map(ord => adaptResponseToDomain(ord))
+
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    return orders;
   }
-  return JSON.parse(raw);
+  return JSON.parse(raw) as Order[];
 }
 
 function saveOrders(orders: Order[]) {
   localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
 }
 
-function generateSeedOrders(): Order[] {
-  const statuses: Order["status"][] = ["registered", "in_progress", "completed", "deleted"];
-  const pedidos = [
-    "API Gateway Migration", "Database Indexing", "Auth Module Refactor",
-    "CI/CD Pipeline Setup", "Logging Infrastructure", "Rate Limiter Implementation",
-    "WebSocket Integration", "Cache Layer Optimization"
-  ];
-  return pedidos.map((pedido, i) => ({
-    id: crypto.randomUUID(),
-    nroOrder: `PED-${String(i + 1).padStart(3, "0")}-${pedido.split(" ")[0].toUpperCase()}`,
-    client: ["Alice", "Bob", "Carol"][i % 3],
-    status: statuses[i % statuses.length],
-    createdAt: new Date(Date.now() - (8 - i) * 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - (4 - (i % 4)) * 86400000).toISOString(),
-    total: parseFloat((Math.random() * 1000 + 100).toFixed(2)),
-  }));
-}
-
 export const apiService = {
-  
+
   async getAll(): Promise<Order[]> {
     return getStoredOrders();
   },
 
   async getById(id: string): Promise<Order> {
-    const order = getStoredOrders().find((o) => o.id === id);
-    if (!order) throw new Error("Order not found");
+    const orders = await getStoredOrders();
+    const order = orders.find((o) => o.id === id);
+    if (!order) {
+      const orderFromDb = await apiClient().get(`/${id}`);
+      if (!orderFromDb) throw new Error('Order not found');
+      return adaptResponseToDomain(orderFromDb);
+    }
     return order;
   },
 
   async create(payload: CreateOrderPayload): Promise<Order> {
-    const orders = getStoredOrders();
-    const newOrder: Order = {
-      id: crypto.randomUUID(),
-      ...payload,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+    const orders = await getStoredOrders();
+
+    const payloadNewOrder = {
+      numeroPedido: payload.nroOrder,
+      cliente: payload.client,
+      total: payload.total,
+      estado: payload.status
     };
+
+    const response = await apiClient().post('/', payloadNewOrder);
+
+    if (response.status !== HttpStatusCode.Created) {
+      throw new Error(response.data);
+    }
+
+    const newOrder = adaptResponseToDomain(response.data)
+
     orders.unshift(newOrder);
     saveOrders(orders);
     return newOrder;
@@ -61,16 +63,43 @@ export const apiService = {
 
 
   async update(id: string, payload: UpdateOrderPayload): Promise<Order> {
-    const orders = getStoredOrders();
+    const orders = await getStoredOrders();
+
     const idx = orders.findIndex((o) => o.id === id);
+
     if (idx === -1) throw new Error("Order not found");
+
+    const payloadUpdateOrder = {
+      id: id,
+      numeroPedido: payload.nroOrder,
+      cliente: payload.client,
+      total: payload.total,
+      estado: payload.status
+    };
+
+    const response = await apiClient().put('/', payloadUpdateOrder);
+
+    if (response.status !== HttpStatusCode.NoContent) {
+      throw new Error(response.data);
+    }
+
     orders[idx] = { ...orders[idx], ...payload, updatedAt: new Date().toISOString() };
+
     saveOrders(orders);
+
     return orders[idx];
   },
 
   async delete(id: string): Promise<void> {
-    const orders = getStoredOrders().filter((o) => o.id !== id);
-    saveOrders(orders);
+
+    const response = await apiClient().delete(`/${id}`);
+
+    if (response.status !== HttpStatusCode.NoContent) {
+      throw new Error(response.data);
+    }
+
+    const orders = await getStoredOrders();
+    const newOrders = orders.filter((o) => o.id !== id);
+    saveOrders(newOrders);
   },
 };

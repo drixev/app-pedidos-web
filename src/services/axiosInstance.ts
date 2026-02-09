@@ -1,10 +1,24 @@
+import { AuthSession } from '@/types';
 import axios from 'axios';
+import { API_BASE_URL, SESSION_KEY } from './constants/keyStorage.contants';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+export const apiClient = () => {
+  const raw = localStorage.getItem(SESSION_KEY);
+  if (!raw) {
+    return axios.create({
+      baseURL: API_BASE_URL,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    });
+  }
+  const session: AuthSession = JSON.parse(raw);
 
-export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+  return axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.token}`
+    },
+  });
+}
